@@ -77,11 +77,3 @@ By the completion of this noteobok, a user will be able to perform similar steps
 ### **Notebook 07_scRNA_analysis_1.3M_brain_example.ipynb - End to end example on 1M Brain Cells**
 
 By the completion of this noteobok, a user will be able to perform similar steps to demo_gpu-seuratv3 but on 1M brain cells.
-
-### **Notebook 08_spatial_analysis_autocorrelation.ipynb - Visualizing and investigating spatial transcriptomics data**
-
-By the completion of this notebook, a user will be able to do the following:
-- Compute spatial autocorrelation, which represents how gene expression levels are spatially distributed across tissue sections.
-- Use Squidpy to compute a graph on the coordinates
-- Compute two metrics using Moran's I (better for global structures) and Geary's C (better for local structures)
-- Explore the results visually by plotting the expression of genes Mbp (myelin-associated) and Nrgn (neuronal marker)

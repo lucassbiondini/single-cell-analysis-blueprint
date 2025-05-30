@@ -54,7 +54,6 @@ For those who are new to doing basic analysis for single cell data, the end to e
 | [05_scRNA_analysis_multi_GPU.ipynb](notebooks/05_scRNA_analysis_multi_GPU.ipynb) | This notebook enhances the 11M cell dataset analysis with Dask without exceeding memory limits.  <br>It fully scales to utilize all available GPUs, uses chunk-based execution, and efficiently manages memory<br>**Requires 8x H100s or better.  For all other GPUs systems, please run [04_scRNA_analysis_dask_out_of_core.ipynb](notebooks/04_scRNA_analysis_dask_out_of_core.ipynb) instead**| 8x 80GB /<br>Large RSC Instance |
 | [06_scRNA_analysis_90k_brain_example.ipynb](notebooks/06_scRNA_analysis_90k_brain_example.ipynb) | In this notebook, show diversity in capability by run a similar workflow to [01_scRNA_analysis_preprocessing.ipynb](notebooks/01_scRNA_analysis_preprocessing.ipynb), but on brain cells | 24GB /<br>Standard RSC Instance |
 | [07_scRNA_analysis_1.3M_brain_example.ipynb](notebooks/07_scRNA_analysis_1.3M_brain_example.ipynb) | In this notebook, we scale up the analysis of [06_scRNA_analysis_90k_brain_example.ipynb](notebooks/06_scRNA_analysis_90k_brain_example.ipynb) to 1 million brain cells.<br>**Requires an 80GB GPU, like an H100** |  80GB /<br>Large RSC Instance |  
-| [08_spatial_analysis_autocorrelation.ipynb](notebooks/08_spatial_analysis_autocorrelation.ipynb) | An introduction to spatial transcriptomics analysis and visualization | 24GB / Standard RSC Instance |  
 
 
 You can find more detail on each notebook in the [Notebooks README](notebooks/README.md).
