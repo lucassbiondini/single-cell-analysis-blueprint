@@ -19,18 +19,18 @@ The quickest way to use these blueprints is to use one of our pre-configured [NV
 
 2. Click **Deploy Launchable** on the Brev.dev Launchable page
 
-    <img src="assets/deploy_brev.png" alt="deploy_brev" width="70%"/>
+    <img src="https://github.com/NVIDIA-AI-Blueprints/single-cell-analysis-blueprint/blob/main/assets/deploy_brev.png" alt="deploy_brev" width="70%"/>
 
 
    
 3. Wait for the Container status show **Ready** (can take up to 8 minutes).  Then, click **Access GPU**
 
-    <img src="assets/go_on_green.png" alt="go_on_green" width="70%"/>
+    <img src="https://github.com/NVIDIA-AI-Blueprints/single-cell-analysis-blueprint/blob/main/assets/go_on_green.png" alt="go_on_green" width="70%"/>
 
    
 4. On the **Instance** page, click **Open Notebook**
 
-    <img src="assets/open_notebook.png" alt="open_notebook" width="70%"/>
+    <img src="https://github.com/NVIDIA-AI-Blueprints/single-cell-analysis-blueprint/blob/main/assets/open_notebook.png" alt="open_notebook" width="70%"/>
 
 
 You should drop into a fully installed and populated JupyterLab environment.  Open up your desired notebook from the list below, and have a great time!
@@ -39,7 +39,7 @@ You should drop into a fully installed and populated JupyterLab environment.  Op
 
 This repository contains a diverse set of notebooks to help get anyone started using RAPIDS-singlecell developed by scverse. 
 
-![layout architecture](assets/scdiagram.png)
+![layout architecture](https://github.com/NVIDIA-AI-Blueprints/single-cell-analysis-blueprint/blob/main/assets/scdiagram.png)
 
 The outline below is a suggested exploration flow.  Unless otherwise noted, you can choose any notebook to get started, as long as you have the GPU resources to run the notebook.
 
