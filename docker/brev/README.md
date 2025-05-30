@@ -6,6 +6,7 @@ This directory contains configuration files to assist in creating a custom Brev 
 RAPIDS 25.06
 ```
 docker/brev/docker-compose-nb-2506-H100-C.yaml  # Use this if you are selecting H100 instances on Crusoe
+docker/brev/docker-compose-nb-2506-aarch64.yaml # Use for ARM based systems like Grace Hopper, Grace Blackwell, or DGX Spark (see Known Issues #1)
 docker/brev/docker-compose-nb-2506.yaml         # Use this for any other resource
 ```
 
