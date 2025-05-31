@@ -14,8 +14,8 @@ If you like these notebooks and this GPU accelerated capability, and want to sup
 The quickest way to use these blueprints is to use one of our pre-configured [NVIDIA Brev](https://console.brev.dev/) reseources.
 
 1. Select your resource size, and click "Deploy Now":  
-  * For a **Standard Instance** (L40s), click here: [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/3DzqANc)  
-  * For a **Large Instance** (8x H100), click here: [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://nvda.ws/3DwSxoU)
+  * For a **Standard Instance** (L40s), click here: [![ Click here to deploy the RAPIDS Singlecell Launchable.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-2xn8JayrpXlBwGXkKASSomq6gXi)  
+  * For a **Large Instance** (8x H100), click here: [![ Click here to deploy.](https://brev-assets.s3.us-west-1.amazonaws.com/nv-lb-dark.svg)](https://brev.nvidia.com/launchable/deploy?launchableID=env-2xn9bEVtfQgLQXHpJUlzESILpfV)
 
 2. Click **Deploy Launchable** on the Brev.dev Launchable page
 

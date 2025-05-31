@@ -48,7 +48,7 @@ docker run --gpus all --pull always --rm -it \
     --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 \
     -p 8888:8888 -p 8787:8787 -p 8786:8786
     -v ~/single-cell-analysis-blueprint:/home/rapids/notebooks/single-cell-analysis-blueprint
-    nvcr.io/nvidia/rapidsai/notebooks:24.12-cuda12.5-py3.12
+    nvcr.io/nvidia/rapidsai/notebooks:25.06-cuda12.8-py3.12
 ```
 **Note:** The volume is currently assuming that you cloned the `single-cell-analysis-blueprint` repository into your `HOME` folder (`~/single-cell-analysis-blueprint`).  If you did not clone it there, please change the `~/single-cell-analysis-blueprint` portion of the above to the correct path before running the command.
 
@@ -72,7 +72,7 @@ For alternate installation instructions, please refer to the [RAPIDS-singlecell 
 2. Currently, restarting an instance, after stopping it, will start up far faster than starting a new instance.
 3. If you **Stop** the instance, all the data on the main storage will be retained for the next time you start it.
 4. To conserve GPU memory, please remember to shut down your completed notebook's kernel before starting a new notebook.
-5. If your data download gets interrupted, please delete the files you intended to download and try again
+5. If your data download gets interrupted, please delete the files you intended to download and try again.
 6. The Standard RSC Instance (L40s) has 128GB of space (~90GB user usable).    
 7. The Large RSC Instance (8x H100) has the same 128GB of space as the Standard RSC Instance, but there is a special `data` folder is mapped to a 1.12TB disk.  Data retention on that disk (in that folder) is not guaranteed.  YMMV.
-
+8. If using an ARM based system, please conda install `compile` before installing `RAPIDS-singlecell` so that you can build `scikit-misc` from source/
