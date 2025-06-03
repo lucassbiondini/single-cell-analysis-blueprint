@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: rapidsai/notebooks:25.06-cuda12.8-py3.12
+    image: rapidsai/notebooks:25.06a-cuda12.8-py3.12
     pull_policy: always
     ulimits:
       memlock: -1
