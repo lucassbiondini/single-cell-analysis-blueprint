@@ -42,7 +42,7 @@ RAPIDS can be installed using Pip, Conda, or Docker.  To replicate the same expe
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh get-docker.sh
 ```
-<i class="fas fa-download text-purple"></i> **3.2 Get RAPIDS:** Use the code below to pull the same RAPIDS container used in the Launchable
+<i class="fas fa-download text-purple"></i> **3.2 Get RAPIDS:** Use the code below to pull the same RAPIDS container used in the Launchable.  Example for 25.06:
 ```
 docker run --gpus all --pull always --rm -it \
     --shm-size=1g --ulimit memlock=-1 --ulimit stack=67108864 \

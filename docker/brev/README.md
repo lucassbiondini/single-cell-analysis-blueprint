@@ -3,23 +3,23 @@
 This directory contains configuration files to assist in creating a custom Brev Launchable environment. For full instructions, please consult our [Creating Custom Brev Resource](../../docs/creating_custom_brev.md) guide.
 
 ## File manifest
-RAPIDS 25.06
+RAPIDS 25.04
+```
+docker/brev/docker-compose-nb-2504-H100-C.yaml  # Use this if you are selecting H100 instances on Crusoe and need RAPIDS 25.04
+docker/brev/docker-compose-nb-2504.yaml         # Use this for any other resource and need RAPIDS 25.04
+```
+
+RAPIDS 25.06 (for future usage)
 ```
 docker/brev/docker-compose-nb-2506-H100-C.yaml  # Use this if you are selecting H100 instances on Crusoe
 docker/brev/docker-compose-nb-2506-aarch64.yaml # Use for ARM based systems like Grace Hopper, Grace Blackwell, or DGX Spark (see Known Issues #1)
 docker/brev/docker-compose-nb-2506.yaml         # Use this for any other resource
 ```
 
-RAPIDS 25.06 nightly
+RAPIDS 25.06 nightly (FOR PRE 25.06 RELEASE TESTING ONLY)
 ```
 docker/brev/docker-compose-nb-2506-H100-C-nightly.yaml  # Test docker-compose for H100 instances on Crusoe for pre-release on 25.06 nightly.  Do not use after 25.06 stable is out.
 docker/brev/docker-compose-nb-2506-nightly.yaml         # Test docker-compose on pre-release on 25.06 nightly.  Do not use after 25.06 stable is out.
-```
-
-RAPIDS 25.04
-```
-docker/brev/docker-compose-nb-2504-H100-C.yaml  # Use this if you are selecting H100 instances on Crusoe and need RAPIDS 25.04
-docker/brev/docker-compose-nb-2504.yaml         # Use this for any other resource and need RAPIDS 25.04
 ```
 
 ## Known Issues
