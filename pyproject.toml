@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "single-cell-blueprint"
+name = "single-cell-analysis-blueprint"
 version = "0.1.0"
 description = ""
 authors = ["taureandyernv <tdyer@nvidia.com>"]
