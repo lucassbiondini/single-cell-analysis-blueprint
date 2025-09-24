@@ -4,7 +4,7 @@ run-name: Single-cell notebooks runner --- triggered by ${{ github.actor }}
 on:
   pull_request: {}
   push:
-    branches: [main, master, staging, release/*]
+    branches: [main, master, staging, release/*, github-action-workflow-pipeline]
   workflow_dispatch:
     inputs:
       environment:
@@ -57,7 +57,7 @@ jobs:
       PYTHON_VERSION: "3.12"
 
       ### CONSTANT
-      DOCKER_WRITEABLE_DIR: "/tmp"
+      DOCKER_WRITEABLE_DIR: "/notebooks"
       DOCKER_CACHE_DIR: "docker-pull-cache"
       OUTPUT_NOTEBOOK: "result_${{ matrix.NOTEBOOK_FILENAME }}"
       OUTPUT_NOTEBOOK_HTML: "result_${{ matrix.NOTEBOOK_FILENAME }}.html"
@@ -141,12 +141,11 @@ jobs:
 
       - name: Ensure cache directory exists
         run: |
-          DOCKER_WRITEABLE_DIR="${{ env.DOCKER_WRITEABLE_DIR }}"
           DOCKER_CACHE_DIR="${{ env.DOCKER_CACHE_DIR }}"
 
-          mkdir -p "$DOCKER_WRITEABLE_DIR/$DOCKER_CACHE_DIR"
-          sudo chown -R $(id -u):$(id -g) "$DOCKER_WRITEABLE_DIR/$DOCKER_CACHE_DIR"
-          ls -ld "$DOCKER_WRITEABLE_DIR/$DOCKER_CACHE_DIR"
+          mkdir -p "$DOCKER_CACHE_DIR"
+          sudo chown -R $(id -u):$(id -g) "$DOCKER_CACHE_DIR"
+          ls -ld "$DOCKER_CACHE_DIR"
 
       - name: Cache Docker image
         id: cache-docker-image
@@ -260,20 +259,18 @@ jobs:
             apt-get clean
           '
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T backend bash <<'EOF'
+          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root backend bash <<'EOF'
           set -euxo pipefail
 
           whoami
           pwd
           ls -al ./
           ls -al ./notebooks/
-          ls -al /tmp/app
-
-          ### double time to copy files from /tmp/app
-          echo "===double confirm the files are copied in home directory==="
-          cp -rf /tmp/app/* /home/rapids/
+          echo "Container working directory: $(pwd)"
+          echo "Container contents:"
           ls -al ./
-          ls -al ./notebooks
+          echo "Notebooks directory contents:"
+          ls -al ./notebooks/ 2>/dev/null || echo "notebooks directory not found"
 
           python -m pip install --upgrade pip --user || true
 
@@ -309,12 +306,6 @@ jobs:
           jupyter kernelspec list
           EOF
 
-      # - name: Debug --- Setup tmate debug session
-      #   uses: mxschmitt/action-tmate@v3
-      #   with:
-      #     limit-access-to-actor: true
-      #     timeout-minutes: 60
-
       - name: Run Jupyter Notebook
         id: run-jupyter-notebook
         timeout-minutes: 30
@@ -327,7 +318,7 @@ jobs:
 
           echo "=============== Executing notebook ====================="
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec backend bash <<EOF
+          docker compose -f "$DOCKER_COMPOSE_FILE" exec -u root backend bash <<EOF
           set -euxo pipefail
           export PYTHONUNBUFFERED=1
 
@@ -361,14 +352,14 @@ jobs:
           OUTPUT_NOTEBOOK_HTML="${{ env.OUTPUT_NOTEBOOK_HTML }}"
           DOCKER_WRITEABLE_DIR="${{ env.DOCKER_WRITEABLE_DIR }}"
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec backend bash <<EOF
+          docker compose -f "$DOCKER_COMPOSE_FILE" exec -u root backend bash <<EOF
           jupyter nbconvert --to html "$DOCKER_WRITEABLE_DIR/$OUTPUT_NOTEBOOK" \
             --output "$DOCKER_WRITEABLE_DIR/$OUTPUT_NOTEBOOK_HTML" \
             --output-dir "$DOCKER_WRITEABLE_DIR" \
             > "$DOCKER_WRITEABLE_DIR/jupyter_nbconvert.log" 2>&1
           EOF
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T backend bash -c '
+          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root backend bash -c '
             echo "===jupyter_nbconvert logs==="
             cat "$DOCKER_WRITEABLE_DIR/jupyter_nbconvert.log"
 
@@ -381,89 +372,13 @@ jobs:
             echo "===============Check file====================="
           '
 
-      # - name: Install Poetry/Dependencies and execute pytest
-      #   id: run-pytest
-      #   run: |
-      #     docker compose -f "$DOCKER_COMPOSE_FILE" exec -T backend bash -c '
-      #       set -euo pipefail
-      #       cd blueprint-github-test
-
-      #       OUTPUT_NOTEBOOK_HTML="${{ env.OUTPUT_NOTEBOOK_HTML }}"
-      #       OUTPUT_PYTEST_COVERAGE_XML="${{ env.OUTPUT_PYTEST_COVERAGE_XML }}"
-      #       OUTPUT_PYTEST_RESULT_XML="${{ env.OUTPUT_PYTEST_RESULT_XML }}"
-      #       OUTPUT_PYTEST_REPORT_HTML="${{ env.OUTPUT_PYTEST_REPORT_HTML }}"
-      #       DOCKER_WRITEABLE_DIR="${{ env.DOCKER_WRITEABLE_DIR }}"
-
-      #       export PATH="/home/rapids/.local/bin:$PATH"
-      #       curl -sSL https://install.python-poetry.org | python3 -
-
-      #       export PATH="/home/rapids/.local/bin:$PATH"
-      #       poetry install --no-interaction --no-root
-      #       source "$(poetry env info --path)/bin/activate"
-
-      #       rm -rf input/*
-      #       NOTEBOOK_BASENAME="${{ steps.set_global_vars.outputs.notebook_basename }}"
-      #       cp "$DOCKER_WRITEABLE_DIR/$OUTPUT_NOTEBOOK_HTML" input/"$NOTEBOOK_BASENAME".html
-      #       echo "===============Test files prepared====================="
-      #       ls -l input/
-
-      #       # poetry run pytest -m single_cell --disable-warnings \
-      #       #   --html="$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_HTML" \
-      #       #   --self-contained-html || echo "Pytest completed with status $?"
-
-      #       TEST_OUTPUT=$(poetry run pytest -m single_cell \
-      #         --cov=./ \
-      #         --cov-report=xml:"$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_COVERAGE_XML" \
-      #         --junitxml="$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" \
-      #         --html"="$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_REPORT_HTML" \
-      #         --self-contained-html 2>&1)
-
-      #       echo "===============Check file====================="
-      #       ls -alh $DOCKER_WRITEABLE_DIR
-      #       echo "===============Check file====================="
-
-      #       echo "TEST_OUTPUT<<EOF" >> $GITHUB_ENV
-      #       echo "$TEST_OUTPUT" >> $GITHUB_ENV
-      #       echo "EOF" >> $GITHUB_ENV
-
-      #       passed=$(xmllint --xpath 'count(//testcase[not(skipped) and not(failure) and not(error)])' "$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" || echo "0")
-      #       failures=$(xmllint --xpath 'count(//testcase[failure])' "$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" || echo "0")
-      #       errors=$(xmllint --xpath 'count(//testcase[error])' "$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" || echo "0")
-      #       skipped=$(xmllint --xpath 'count(//testcase[skipped])' "$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" || echo "0")
-      #       xfailed=$(xmllint --xpath 'count(//testcase[contains(@name, "[xfail]")])' "$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" || echo "0")
-      #       xpassed=$(xmllint --xpath 'count(//testcase[contains(@name, "[xpass]")])' "$DOCKER_WRITEABLE_DIR/$OUTPUT_PYTEST_RESULT_XML" || echo "0")
-      #       actual_passed=$((passed - xpassed))
-
-      #       echo "### 📊 Python ${{ matrix.NOTEBOOK_FILENAME }} Detailed Results" >> $GITHUB_STEP_SUMMARY
-      #       echo '```' >> $GITHUB_STEP_SUMMARY
-      #       echo "$TEST_OUTPUT" >> $GITHUB_STEP_SUMMARY
-      #       echo '```' >> $GITHUB_STEP_SUMMARY
-
-      #       echo "### 🔍 Test Summary" >> $GITHUB_STEP_SUMMARY
-      #       echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
-      #       echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-      #       echo "| ✅ Passed | $actual_passed |" >> $GITHUB_STEP_SUMMARY
-      #       echo "| ❌ Failed | $failures |" >> $GITHUB_STEP_SUMMARY
-      #       echo "| ⏩ Skipped | $skipped |" >> $GITHUB_STEP_SUMMARY
-      #       echo "| 💥 Errors | $errors |" >> $GITHUB_STEP_SUMMARY
-      #       echo "| 🔶 XFailed | $xfailed |" >> $GITHUB_STEP_SUMMARY
-      #       echo "| ⚠️ XPassed | $xpassed |" >> $GITHUB_STEP_SUMMARY
-
-      #       echo "passed=$actual_passed" >> $GITHUB_OUTPUT
-      #       echo "failed=$failures" >> $GITHUB_OUTPUT
-      #       echo "skipped=$skipped" >> $GITHUB_OUTPUT
-      #       echo "errors=$errors" >> $GITHUB_OUTPUT
-      #       echo "xfailed=$xfailed" >> $GITHUB_OUTPUT
-      #       echo "xpassed=$xpassed" >> $GITHUB_OUTPUT
-      #     '
-
       - name: Install Poetry/Dependencies and execute pytest
         id: run-pytest
         run: |
           SCRIPT_FILE=$(mktemp)
           cat > $SCRIPT_FILE <<'EOS'
           set -euxo pipefail
-          cd blueprint-github-test
+          cd /notebooks/blueprint-github-test
 
           OUTPUT_NOTEBOOK_HTML="$1"
           OUTPUT_PYTEST_COVERAGE_XML="$2"
@@ -472,7 +387,7 @@ jobs:
           DOCKER_WRITEABLE_DIR="$5"
           NOTEBOOK_BASENAME="$6"
 
-          export PATH="/home/rapids/.local/bin:$PATH"
+          export PATH="/root/.local/bin:$PATH"
           python -m pip install --upgrade pip
           curl -sSL https://install.python-poetry.org | python3 -
 
@@ -508,7 +423,7 @@ jobs:
           fi
           EOS
 
-          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T backend bash -s -- \
+          docker compose -f "$DOCKER_COMPOSE_FILE" exec -T -u root backend bash -s -- \
             "${{ env.OUTPUT_NOTEBOOK_HTML }}" \
             "${{ env.OUTPUT_PYTEST_COVERAGE_XML }}" \
             "${{ env.OUTPUT_PYTEST_RESULT_XML }}" \
