@@ -59,6 +59,7 @@ jobs:
       ### CONSTANT
       DOCKER_WRITEABLE_DIR: "/notebooks"
       DOCKER_CACHE_DIR: "docker-pull-cache"
+      HOST_CACHE_DIR: "${{ github.workspace }}/docker-pull-cache"
       OUTPUT_NOTEBOOK: "result_${{ matrix.NOTEBOOK_FILENAME }}"
       OUTPUT_NOTEBOOK_HTML: "result_${{ matrix.NOTEBOOK_FILENAME }}.html"
       OUTPUT_PYTEST_COVERAGE_XML: "pytest_coverage_${{ matrix.NOTEBOOK_FILENAME }}.xml"
@@ -141,18 +142,18 @@ jobs:
 
       - name: Ensure cache directory exists
         run: |
-          DOCKER_CACHE_DIR="${{ env.DOCKER_CACHE_DIR }}"
+          HOST_CACHE_DIR="${{ env.HOST_CACHE_DIR }}"
 
-          mkdir -p "$DOCKER_CACHE_DIR"
-          sudo chown -R $(id -u):$(id -g) "$DOCKER_CACHE_DIR"
-          ls -ld "$DOCKER_CACHE_DIR"
+          mkdir -p "$HOST_CACHE_DIR"
+          sudo chown -R $(id -u):$(id -g) "$HOST_CACHE_DIR"
+          ls -ld "$HOST_CACHE_DIR"
 
       - name: Cache Docker image
         id: cache-docker-image
         if: always()
         uses: actions/cache@v3
         with:
-          path: ${{ env.DOCKER_CACHE_DIR }}
+          path: ${{ env.HOST_CACHE_DIR }}
           key: "${{ steps.set_global_vars.outputs.cache_key }}"
           restore-keys: |
             ${{ runner.os }}-docker-
@@ -161,19 +162,19 @@ jobs:
         run: |
           echo "Primary Key: ${{ steps.cache-docker-image.outputs.cache-primary-key || 'N/A' }}"
           echo "Cache Hit: ${{ steps.cache-docker-image.outputs.cache-hit || 'false' }}"
-          echo "Cache Path: ${{ env.DOCKER_WRITEABLE_DIR }}/${{ env.DOCKER_CACHE_DIR }}"
-          ls -la ${{ env.DOCKER_WRITEABLE_DIR }}/${{ env.DOCKER_CACHE_DIR }}
+          echo "Cache Path: ${{ env.HOST_CACHE_DIR }}"
+          ls -la "${{ env.HOST_CACHE_DIR }}" || echo "Directory not found"
 
       - name: Load cached docker image
         if: steps.cache-docker-image.outputs.cache-hit == 'true'
         run: |
-          DOCKER_CACHE_DIR="${{ env.DOCKER_CACHE_DIR }}"
+          HOST_CACHE_DIR="${{ env.HOST_CACHE_DIR }}"
           DOCKER_IMG_CACHE_NAME="${{ steps.set_global_vars.outputs.docker_img_cache_name }}"
-          echo "Cached file with path: $DOCKER_CACHE_DIR/$DOCKER_IMG_CACHE_NAME"
+          echo "Cached file with path: $HOST_CACHE_DIR/$DOCKER_IMG_CACHE_NAME"
 
-          if [ -f "${DOCKER_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}.tar" ]; then
+          if [ -f "${HOST_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}.tar" ]; then
             echo "[Info]: the docker image cache exists, just load it from cache"
-            docker load -i "${DOCKER_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}".tar
+            docker load -i "${HOST_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}".tar
             echo "[Info]: the docker image cache exists, just load it from cache --- Done"
           fi
 
@@ -183,7 +184,7 @@ jobs:
 
           DOCKER_IMG_NAME="${{ env.DOCKER_IMG_NAME }}"
           DOCKER_IMG_TAG="${{ env.DOCKER_IMG_TAG }}"
-          DOCKER_CACHE_DIR="${{ env.DOCKER_CACHE_DIR }}"
+          HOST_CACHE_DIR="${{ env.HOST_CACHE_DIR }}"
           DOCKER_IMG_CACHE_NAME="${{ steps.set_global_vars.outputs.docker_img_cache_name }}"
 
           echo "Docker image will use: $DOCKER_IMG_NAME:$DOCKER_IMG_TAG"
@@ -205,11 +206,11 @@ jobs:
           echo "[Info]: the docker image cache does NOT exists, just pull it from remote --- Done"
 
 
-          mkdir -p ${DOCKER_CACHE_DIR}
+          mkdir -p ${HOST_CACHE_DIR}
           echo "[Info]: the docker image pull done, save it to cache path now"
-          docker save $DOCKER_IMG_NAME:$DOCKER_IMG_TAG > ${DOCKER_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}.tar
-          docker save -o ${DOCKER_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}.tar $DOCKER_IMG_NAME:$DOCKER_IMG_TAG
-          ls -alh ${DOCKER_CACHE_DIR}
+          docker save $DOCKER_IMG_NAME:$DOCKER_IMG_TAG > ${HOST_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}.tar
+          docker save -o ${HOST_CACHE_DIR}/${DOCKER_IMG_CACHE_NAME}.tar $DOCKER_IMG_NAME:$DOCKER_IMG_TAG
+          ls -alh ${HOST_CACHE_DIR}
           echo "[Info]: the docker image pull done, save it to cache path now --- Done"
 
           end_time=$(date +%s)
@@ -218,8 +219,8 @@ jobs:
 
       - name: Verify cache
         run: |
-          DOCKER_CACHE_DIR="${{ env.DOCKER_CACHE_DIR }}"
-          du -sh ${DOCKER_CACHE_DIR}/*
+          HOST_CACHE_DIR="${{ env.HOST_CACHE_DIR }}"
+          du -sh ${HOST_CACHE_DIR}/* 2>/dev/null || echo "No cache files found"
 
       - name: Start container
         run: |
