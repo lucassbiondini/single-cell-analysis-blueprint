@@ -4,7 +4,7 @@ run-name: Single-cell notebooks runner --- triggered by ${{ github.actor }}
 on:
   pull_request: {}
   push:
-    branches: [main, master, staging, release/*, github-action-workflow-pipeline]
+    branches: [main, master, staging, release/*]
   workflow_dispatch:
     inputs:
       environment:
@@ -30,7 +30,7 @@ concurrency:
 
 jobs:
   run-notebook:
-    runs-on: arc-runner-set-oke-org-poc
+    runs-on: arc-runner-set-oke-org-nv-ai-bp
     environment: dev
     strategy:
       matrix:
